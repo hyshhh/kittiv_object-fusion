@@ -1,27 +1,18 @@
-# KITTI Object data transformation and visualization
+# KITTI Object data to develop a decision-level fusion perception algorithm
+## Introduction
+The following is our approach to decision-level fusion; we aim to achieve the integration of 2D and 3D detection results in both image space and point cloud space.
+![image](https://github.com/user-attachments/assets/179397ce-1edc-4635-9dc2-39418c09ee89)
 
 
+## Preparation of 2D and 3D inspection results
+You can download our data or prepare it yourself
 
-## Dataset
+**1.You can download our data**
 
-Download the data (calib, image\_2, label\_2, velodyne) from [Kitti Object Detection Dataset](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d) and place it in your data folder at `kitti/object`
-
-
-The folder structure is as following:
+our data save in data/object/training,The folder structure is as following:
 ```
 kitti
     object
-        testing
-            calib
-               000000.txt
-            image_2
-               000000.png
-            label_2
-               000000.txt
-            velodyne
-               000000.bin
-            pred
-               000000.txt
         training
             calib
                000000.txt
@@ -31,132 +22,37 @@ kitti
                000000.txt
             velodyne
                000000.bin
-            pred
+            detect
+               000000.txt
+            detect3D
                000000.txt
 ```
-
-## Install locally on a Ubuntu 16.04 PC with GUI
-- start from a new conda enviornment:
+**2.You can prepare data yourself**
+- "velodyne/image_2/label_2" files save kitti dataset,you can get them from Kitti Object Detection Dataset
+- "detect" file saves the 2D detect result,you can detect using your model and save the results to them In the following format
 ```
-(base)$ conda create -n kitti_vis python=3.7 # vtk does not support python 3.8
-(base)$ conda activate kitti_vis
+type            x1        y1     x2      y2                                 score                                    
+Car -1 -1 -10 1133.50 278.19 1225.04 329.51 -1 -1 -1 -1000 -1000 -1000 -10 0.0150    # the format of kitti
+#you only need to save the result of(type/x1、x2、y1、y2/score)
 ```
-- opencv, pillow, scipy, matplotlib
+- "detect3D" file save the 3D detect result,you can still use your model to detect and save the results In the following format
 ```
-(kitti_vis)$ pip install opencv-python pillow scipy matplotlib
+Car -1 -1 -10 1133.50 278.19 1225.04 329.51 -1 -1 -1 -1000 -1000 -1000 -10 0.0150    # the format of kitti
 ```
-- install mayavi from conda-forge, this installs vtk and pyqt5 automatically
-```
-(kitti_vis)$ conda install mayavi -c conda-forge
-```
-- test installation
-```
-(kitti_vis)$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis
-```
-
-**Note: the above installation has been tested not work on MacOS.**
-
-## Install remotely
-Please refer to the [jupyter](jupyter/) folder for installing on a remote server and visulizing in Jupyter Notebook.
-
-## Visualization
-
-1. 3D boxes on LiDar point cloud in volumetric mode
-2. 2D and 3D boxes on Camera image
-3. 2D boxes on LiDar Birdview
-4. LiDar data on Camera image
-
-
-```shell
-$ python kitti_object.py --help
-usage: kitti_object.py [-h] [-d N] [-i N] [-p] [-s] [-l N] [-e N] [-r N]
-                       [--gen_depth] [--vis] [--depth] [--img_fov]
-                       [--const_box] [--save_depth] [--pc_label]
-                       [--show_lidar_on_image] [--show_lidar_with_depth]
-                       [--show_image_with_boxes]
-                       [--show_lidar_topview_with_boxes]
-
-KIITI Object Visualization
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -d N, --dir N         input (default: data/object)
-  -i N, --ind N         input (default: data/object)
-  -p, --pred            show predict results
-  -s, --stat            stat the w/h/l of point cloud in gt bbox
-  -l N, --lidar N       velodyne dir (default: velodyne)
-  -e N, --depthdir N    depth dir (default: depth)
-  -r N, --preddir N     predicted boxes (default: pred)
-  --gen_depth           generate depth
-  --vis                 show images
-  --depth               load depth
-  --img_fov             front view mapping
-  --const_box           constraint box
-  --save_depth          save depth into file
-  --pc_label            5-verctor lidar, pc with label
-  --show_lidar_on_image
-                        project lidar on image
-  --show_lidar_with_depth
-                        --show_lidar, depth is supported
-  --show_image_with_boxes
-                        show lidar
-  --show_lidar_topview_with_boxes
-                        show lidar topview
-  --split               use training split or testing split (default: training)
-
-```
-
-```shell
-$ python kitti_object.py
-```
-Specific your own folder,
-```shell
-$ python kitti_object.py -d /path/to/kitti/object
-```
-
-Show LiDAR only
-```
-$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis
-```
-
-Show LiDAR and image
-```
-$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes
-```
-
-Show LiDAR and image with specific index
-```
-$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes --ind 1 
-```
-
-Show LiDAR with `modified LiDAR file` with an additional point cloud label/marker as the 5th dimention(5 vector: x, y, z, intensity, pc_label). (This option is for very specific case. If you don't have this type of data, don't use this option).
-```
-$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --pc_label
-```
+## Environment preparation
+- Our project is based on kitti_object_vis framework
+- please follow the link below to configure the environment first
+https://github.com/kuixu/kitti_object_vis
+**Note:we recommend using conda to prepare environment**
 
 ## Demo
-
-#### 2D, 3D boxes and LiDar data on Camera image
-<img src="./imgs/rgb.png" alt="2D, 3D boxes LiDar data on Camera image" align="center" />
-<img src="./imgs/lidar-label.png" alt="boxes with class label" align="center" />
-Credit: @yuanzhenxun
-
-#### LiDar birdview and point cloud (3D)
-<img src="./imgs/lidar.png" alt="LiDar point cloud and birdview" align="center" />
-
-## Show Predicted Results
-
-Firstly, map KITTI official formated results into data directory
+- Enter your environment
+- Use the code below to demonstrate the fusion result in a 2D plane
 ```
-./map_pred.sh /path/to/results
+python test.py 
 ```
+In test.py,you can get many result if you Replace the comments in the main function.
+![image](https://github.com/user-attachments/assets/6234fefc-97fe-41aa-910d-98e60f0c2181)
+## Demo result 
+![image](https://github.com/user-attachments/assets/f3b04b66-0868-4163-a7c6-df8eb3f9dc90)
 
-```python
-python kitti_object.py -p --vis
-```
-<img src="./imgs/pred.png" alt="Show Predicted Results" align="center" />
-
-
-## Acknowlegement
-
-Code is mainly from [f-pointnet](https://github.com/charlesq34/frustum-pointnets) and [MV3D](https://github.com/bostondiditeam/MV3D)
